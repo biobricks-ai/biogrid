@@ -1,25 +1,43 @@
 from bs4 import BeautifulSoup
-import requests
-import re
-import shutil
 from pathlib import Path
+import re
+import requests
+import shutil
 
-# create download directory
-downloads = Path("download")
-downloads.mkdir()
+
+def create_download_dir():
+    downloads = Path("download")
+    downloads.mkdir(exist_ok=True)
 
 
-biogrid_downloads = requests.get("https://downloads.thebiogrid.org/BioGRID/Release-Archive/BIOGRID-4.4.232/",
-                                 headers={"accept": "text/html"})
-html = biogrid_downloads.text
-soup = BeautifulSoup(html)
-download_links = soup.find_all("a", {"href": re.compile("https://.*\/Download\/(?!.*OSPREY).*\.tab3.zip$")})
-get_link_text = lambda el: el['href']
-link_texts = map(get_link_text, download_links)
+URL = "https://downloads.thebiogrid.org/BioGRID/Release-Archive/BIOGRID-4.4.232/"
 
-for link in link_texts:
-    response = requests.get(link, stream=True).raw
-    outfile_path = downloads / Path(link.split("/")[-1]).name
-    print(outfile_path)
-    with open(outfile_path, "wb") as f:
-        shutil.copyfileobj(response, f)
+
+def get_biogrid_html():
+    biogrid_downloads = requests.get(URL, headers={"accept": "text/html"})
+    html = biogrid_downloads.text
+    soup = BeautifulSoup(html)
+    return soup
+
+
+files_regex = re.compile("https://.*/Download/(?!.*OSPREY).*\.tab3.zip$")
+
+
+def find_download_links():
+    download_links = get_biogrid_html().find_all("a", {"href": files_regex})
+    link_texts = map(lambda el: el['href'], download_links)
+    return link_texts
+
+
+def download_files():
+    for link in find_download_links():
+        response = requests.get(link, stream=True).raw
+        outfile_path = Path("download") / Path(link.split("/")[-1]).name
+        print(outfile_path)
+        with open(outfile_path, "wb") as f:
+            shutil.copyfileobj(response, f)
+
+
+if __name__ == '__main__':
+    create_download_dir()
+    download_files()
