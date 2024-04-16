@@ -1,3 +1,38 @@
----
 schema: '2.0'
-stages: {}
+stages:
+  download:
+    cmd: python3 stages/00_download.py
+    deps:
+    - path: stages/00_download.py
+      hash: md5
+      md5: 196f37a8536356bc0b97ed3a2ca9d8b6
+      size: 1105
+    outs:
+    - path: download
+      hash: md5
+      md5: 44db84761ff672e1eaecbca42686d6c2.dir
+      size: 539220407
+      nfiles: 5
+  build:
+    cmd: python3 stages/01_process.py
+    deps:
+    - path: download
+      hash: md5
+      md5: 44db84761ff672e1eaecbca42686d6c2.dir
+      size: 539220407
+      nfiles: 5
+    - path: stages/01_process.py
+      hash: md5
+      md5: aa849274a88cfb82e0e5e9cf4af83542
+      size: 1634
+    outs:
+    - path: brick
+      hash: md5
+      md5: 60aa119858c2f21a295dbbb4d34a974d.dir
+      size: 23316427
+      nfiles: 84
+    - path: unzip
+      hash: md5
+      md5: f4ae8b7f712688a760076c6d8d17d07d.dir
+      size: 4600601755
+      nfiles: 114
