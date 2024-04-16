@@ -1,52 +1,65 @@
+import logging
 import numpy as np
 import pandas as pd
 from pathlib import Path
 import pyarrow.lib as pa
 import zipfile
 
+logging.basicConfig(format="%(asctime)s %(message)s")
+logger = logging.getLogger(__name__)
+logger.setLevel("INFO")
+
+logger.info("Running process script.")
+
 
 def create_unzip_dir():
+    logger.info("creating unzip/ directory")
     unzip_dir = Path("unzip")
     unzip_dir.mkdir(exist_ok=True)
+    return unzip_dir
 
 
 def unzip_file(f):
     file_path = Path(f)
-    print(file_path)
+    logger.info("unzipping file at %s", file_path)
     with open(file_path, "rb") as zip:
-        try:   
+        try:
             zip_root = zipfile.ZipFile(zip)
             zip_root.extractall(Path("unzip"))
         except zipfile.BadZipFile:
-            print(f"There was a problem unzipping: {f}")
+            logger.debug("Problem unzipping file", exc_info=1)
 
 
 def read_file(f):
-    filename = f.name or "Unnamed file"
-    print(f"reading {filename} into CSV")
+    logger.info("reading CSV from %s", f.name)
     dtypes = {"Entrez Gene Interactor A": np.int64,
               "Entrez Gene Interactor B": np.int64}
-    return pd.read_csv(f, delimiter="\t", dtype=dtypes)
+    df = pd.read_csv(f, delimiter="\t", dtype=dtypes, low_memory=False)
+    df.rename(columns={"#BioGRID Interaction ID": "BioGRID Interaction ID"},
+              inplace=True)
+    return df
 
 
 def create_out_dir():
+    logger.info("Creating brick/ directory")
     brick_dir = Path("brick")
     brick_dir.mkdir(exist_ok=True)
-   
+
 
 def create_parquet_file(f: Path):
     df = None
     try:
         df = read_file(f)
     except Exception:
-        print(f"error reading file: {f.name}")
+        logger.debug(f"error reading file: {f.name}")
     if df is not None:
         outfile_name = f.relative_to(Path("unzip")).with_suffix(".parquet")
         outfile_path = Path("brick") / outfile_name
         try:
+            logger.info("Writing CSV data to Parquet")
             df.to_parquet(outfile_path)
         except pa.ArrowTypeError:
-            print("Error writing Parquet file")
+            logger.debug("Error writing Parquet file", exc_info=1)
 
 
 def run_script():
