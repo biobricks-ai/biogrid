@@ -23,14 +23,14 @@ stages:
       nfiles: 5
     - path: stages/01_process.py
       hash: md5
-      md5: aa849274a88cfb82e0e5e9cf4af83542
-      size: 1634
+      md5: 84b259c747c7fd3f18a404505950b689
+      size: 2127
     outs:
     - path: brick
       hash: md5
-      md5: 60aa119858c2f21a295dbbb4d34a974d.dir
-      size: 23316427
-      nfiles: 84
+      md5: 4117e08f87d8f57dd456bd02740f5fde.dir
+      size: 71599490
+      nfiles: 89
     - path: unzip
       hash: md5
       md5: f4ae8b7f712688a760076c6d8d17d07d.dir

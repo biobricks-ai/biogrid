@@ -68,7 +68,6 @@ def run_script():
     raw_path = Path("download")
     unzip_path = Path("unzip")
     for file in raw_path.rglob("*.zip"):
-        print(file.name)
         unzip_file(file)
     for file in unzip_path.rglob("*.txt"):
         create_parquet_file(file)
