@@ -30,14 +30,42 @@ def unzip_file(f):
             logger.debug("Problem unzipping file", exc_info=1)
 
 
+def split_or_retain(value: str):
+    return str.join(",", value.split('|') if '|' in value else value)
+
+
+DTYPES = {k: pd.StringDtype(storage="pyarrow") for k in
+          ["SWISS-PROT Accessions Interactor A",
+           "TREMBL Accessions Interactor A",
+           "REFSEQ Accessions Interactor A",
+           "SWISS-PROT Accessions Interactor B",
+           "TREMBL Accessions Interactor B",
+           "REFSEQ Accessions Interactor B",
+           "Ontology Term IDs",
+           "Ontology Term Names",
+           "Ontology Term Categories",
+           "Ontology Term Qualifier IDs",
+           "Ontology Term Qualifier Names",
+           "Ontology Term Types",
+           "Tags", "Qualifications",
+           "Post Translational Modification"]}
+
+
 def read_file(f):
     logger.info("reading CSV from %s", f.name)
-    dtypes = {"Entrez Gene Interactor A": np.int64,
-              "Entrez Gene Interactor B": np.int64}
-    df = pd.read_csv(f, delimiter="\t", dtype=dtypes, low_memory=False)
-    df.rename(columns={"#BioGRID Interaction ID": "BioGRID Interaction ID"},
-              inplace=True)
-    return df
+    df = pd.read_csv(f,
+                     na_values=["-"],
+                     delimiter="\t",
+                     dtype=DTYPES,
+                     low_memory=False,
+                     on_bad_lines='skip')
+    if df is not None:
+        df.rename(columns={"#BioGRID Interaction ID": "BioGRID Interaction ID"},
+                  inplace=True)
+        return df
+    else:
+        logger.warning("Something went wrong reading this DataFrame")
+        return None
 
 
 def create_out_dir():
@@ -58,8 +86,11 @@ def create_parquet_file(f: Path):
         try:
             logger.info("Writing CSV data to Parquet")
             df.to_parquet(outfile_path)
-        except pa.ArrowTypeError:
-            logger.debug("Error writing Parquet file", exc_info=1)
+        except pa.ArrowTypeError as arrow_err:
+            logger.error("Error writing Parquet file: %s", arrow_err,
+                         exc_info=1)
+    else:
+        logger.info("File name with null DF: %s", f)
 
 
 def run_script():
