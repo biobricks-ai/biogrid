@@ -1,4 +1,5 @@
 from bs4 import BeautifulSoup
+from concurrent.futures import ThreadPoolExecutor, as_completed
 import logging
 from pathlib import Path
 import re
@@ -36,13 +37,29 @@ def find_download_links():
     return link_texts
 
 
-def download_files():
-    for link in find_download_links():
-        response = requests.get(link, stream=True).raw
-        outfile_path = Path("download") / Path(link.split("/")[-1]).name
-        logger.info("Downloading file to %s", outfile_path)
+def _download_file(url):
+    response = requests.get(url, stream=True).raw
+    outfile_path = Path("download") / Path(url.split("/")[-1]).name
+    logger.info("Downloading file to %s", outfile_path)
+    try:
         with open(outfile_path, "wb") as f:
             shutil.copyfileobj(response, f)
+            return True
+    except OSError:
+        return False
+
+
+def download_files():
+    with ThreadPoolExecutor(5, "biogrid_download") as exec:
+        future_to_url = {exec.submit(_download_file, url):
+                         url for url in find_download_links()}
+        for future in as_completed(future_to_url):
+            url = future_to_url[future]
+            try:
+                if future.result():
+                    logger.info("Successfully downloaded file")
+            except Exception as exc:
+                logger.error('%r generated an exception: %s' % (url, exc))
 
 
 if __name__ == '__main__':
