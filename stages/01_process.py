@@ -9,8 +9,6 @@ logging.basicConfig(format="%(asctime)s %(message)s")
 logger = logging.getLogger(__name__)
 logger.setLevel("INFO")
 
-logger.info("Running process script.")
-
 
 def create_unzip_dir():
     logger.info("creating unzip/ directory")
@@ -28,10 +26,6 @@ def unzip_file(f):
             zip_root.extractall(Path("unzip"))
         except zipfile.BadZipFile:
             logger.debug("Problem unzipping file", exc_info=1)
-
-
-def split_or_retain(value: str):
-    return str.join(",", value.split('|') if '|' in value else value)
 
 
 DTYPES = {k: pd.StringDtype(storage="pyarrow") for k in
@@ -94,6 +88,7 @@ def create_parquet_file(f: Path):
 
 
 def run_script():
+    logger.info("Running process script.")
     create_unzip_dir()
     create_out_dir()
     raw_path = Path("download")
