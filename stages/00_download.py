@@ -27,15 +27,14 @@ def get_biogrid_html():
     soup = BeautifulSoup(html, features="html.parser")
     return soup
 
-
-tab3_files = re.compile("https://.*/Download/(?!.*OSPREY).*\.tab3.zip$")
+REGEX = "^https://.*/Download/.*/BIOGRID-((?!OSPREY).*\.*(tab3|chemtab|ptm|-4.4.232)|(IDENTIFIERS-4.4.232.tab)).zip$"
+files = re.compile(REGEX)
 
 
 def find_download_links():
-    download_links = get_biogrid_html().find_all("a", {"href": tab3_files})
+    download_links = get_biogrid_html().find_all("a", {"href": files})
     link_texts = map(lambda el: el['href'], download_links)
     return link_texts
-
 
 def _download_file(url):
     response = requests.get(url, stream=True).raw

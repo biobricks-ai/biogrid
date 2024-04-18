@@ -1,8 +1,8 @@
 import logging
-import numpy as np
 import pandas as pd
 from pathlib import Path
 import pyarrow.lib as pa
+import re
 import zipfile
 
 logging.basicConfig(format="%(asctime)s %(message)s")
@@ -17,13 +17,26 @@ def create_unzip_dir():
     return unzip_dir
 
 
+ZIP_DIR_PATTERN = re.compile(".*((?=tab3)|(?=ptm)|(?=chemtab)|(?=-4.4.232))")
+
+
 def unzip_file(f):
     file_path = Path(f)
-    logger.info("unzipping file at %s", file_path)
+    match = re.match(ZIP_DIR_PATTERN, file_path.stem)
+    if match is not None:
+        directory_base = match[0]
+        base_path = Path("unzip")
+        if directory_base[-1] == ".":
+            base_path /= Path(directory_base[:-1])
+        else:
+            base_path /= Path(directory_base)
+        if not base_path.exists():
+            base_path.mkdir()
+            logger.info("unzipping file at %s", base_path)
     with open(file_path, "rb") as zip:
         try:
             zip_root = zipfile.ZipFile(zip)
-            zip_root.extractall(Path("unzip"))
+            zip_root.extractall(base_path)
         except zipfile.BadZipFile:
             logger.debug("Problem unzipping file", exc_info=1)
 
@@ -76,10 +89,13 @@ def create_parquet_file(f: Path):
         logger.debug(f"error reading file: {f.name}")
     if df is not None:
         outfile_name = f.relative_to(Path("unzip")).with_suffix(".parquet")
-        outfile_path = Path("brick") / outfile_name
+        outfile_rel_path = outfile_name.parents[0]
+        outfile_path = Path("brick") / outfile_rel_path
+        if not outfile_path.exists():
+            outfile_path.mkdir()
         try:
             logger.info("Writing CSV data to Parquet")
-            df.to_parquet(outfile_path)
+            df.to_parquet(Path("brick") / outfile_name)
         except pa.ArrowTypeError as arrow_err:
             logger.error("Error writing Parquet file: %s", arrow_err,
                          exc_info=1)
