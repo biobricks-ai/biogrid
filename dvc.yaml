@@ -5,11 +5,19 @@ stages:
       - stages/00_download.py
     outs:
       - download
-  build: 
-    cmd: python3 stages/01_process.py
+      - version.yaml
+  unzip:
+    cmd: python3 stages/01_unzip.py
     deps:
-      - stages/01_process.py
-      - download
+      - stages/01_unzip.py
+      - version.yaml
     outs:
       - unzip
+  build: 
+    cmd: python3 stages/02_process.py
+    deps:
+      - stages/02_process.py
+      - download
+      - version.yaml
+    outs:
       - brick
