@@ -5,11 +5,19 @@ from pathlib import Path
 import re
 import requests
 import shutil
+from yaml import dump
 
 logging.basicConfig(format="%(asctime)s %(message)s")
 logger = logging.getLogger(__name__)
 logger.setLevel("INFO")
 
+
+def create_config_file(version: str):
+    yaml_path = Path("version.yaml")
+    yaml_path.touch()
+    with open(yaml_path, "w") as yaml:
+        dump({'version': version}, yaml)
+        
 
 def create_download_dir():
     logger.info("Creating download/ directory")
@@ -17,8 +25,16 @@ def create_download_dir():
     downloads.mkdir(exist_ok=True)
 
 
-URL = "https://downloads.thebiogrid.org/BioGRID/Release-Archive/BIOGRID-4.4.232/"
+def find_current_release():
+    downloads_page = requests.get("https://downloads.thebiogrid.org/BioGRID").text
+    soup = BeautifulSoup(downloads_page, "html.parser")
+    return soup.find("a", string="Current-Release")['href']
 
+URL = find_current_release()
+VERSION = re.search("(\d+\.*)+", URL)
+
+if VERSION is not None:
+    create_config_file(VERSION[0])
 
 def get_biogrid_html():
     logger.info("Fetching BioGRID HTML page")
@@ -27,7 +43,7 @@ def get_biogrid_html():
     soup = BeautifulSoup(html, features="html.parser")
     return soup
 
-REGEX = "^https://.*/Download/.*/BIOGRID-((?!OSPREY).*\.*(tab3|chemtab|ptm|-4.4.232)|(IDENTIFIERS-4.4.232.tab)).zip$"
+REGEX = f"^https://.*/Download/.*/BIOGRID-((?!OSPREY).*\.*(tab3|chemtab|ptm|-{VERSION})|(IDENTIFIERS-{VERSION}.tab)).zip$"
 files = re.compile(REGEX)
 
 
@@ -61,7 +77,11 @@ def download_files():
                 logger.error('%r generated an exception: %s' % (url, exc))
 
 
-if __name__ == '__main__':
+def run_script():
     logger.info("Running download script")
     create_download_dir()
     download_files()
+
+
+if __name__ == '__main__':
+    run_script()    
