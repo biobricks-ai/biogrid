@@ -13,7 +13,7 @@
         devShells.default = dev-shell.devShells.${system}.default.overrideAttrs
           (oldAttrs: {
             buildInputs = oldAttrs.buildInputs ++ [
-              (python3.withPackages (ps: with ps; [ bs4 numpy pandas pyarrow requests ]))
+              (python3.withPackages (ps: with ps; [ beautifulsoup4 numpy pandas pyarrow pyyaml requests ]))
             ];
           });
       });
