@@ -1,3 +1,4 @@
+from collections import defaultdict
 import logging
 from pathlib import Path
 import re
@@ -23,28 +24,32 @@ def create_zip_re_pattern():
         config = yaml.load(f, yaml.Loader)
     VERSION_STR = re.escape(config['version'])
     ZIP_DIR_PATTERN = re.compile(f".*((?=\.tab3)|(?=\.ptm)|(?=\.chemtab)|(?={VERSION_STR}))")
-    return (VERSION_STR, ZIP_DIR_PATTERN)
+    return ZIP_DIR_PATTERN
 
+
+ZIP_DIR_PATTERN = create_zip_re_pattern()
+FILE_PATTERN = re.compile(r"(?P<filename>BIOGRID-[A-Z]+)-*(?P<sub_project>[A-Za-z_]*)-{1}(?P<version_no>[0-9][1-9.]*)")
 
 def unzip_file(f):
     file_path = Path(f)
-    version_str, zip_pattern = create_zip_re_pattern()
-    match = re.match(zip_pattern, file_path.stem)
+    match = re.search(ZIP_DIR_PATTERN, file_path.stem)
+    print(match)
     if match is not None:
         directory_base = match[0]
-        wo_version_str = re.match(f"^.*(?={version_str})", directory_base)
-        unzip_path = Path("unzip")
-        if wo_version_str is not None:
-            base_path = unzip_path / Path(wo_version_str[0][:-1])
-            if not base_path.exists():
-                base_path.mkdir()
-                logger.info("unzipping file at %s", base_path)
+        filename = re.search(FILE_PATTERN, directory_base)
+        if filename is not None:
+            groups = filename.groupdict()
+            backup = defaultdict(lambda: "")
+            backup |= groups
+            unzip_path = Path("unzip", backup['filename'] + backup['sub_project'])
+            logger.info("unzipping file at %s", unzip_path)
             with open(file_path, "rb") as zip:
                 try:
                     zip_root = zipfile.ZipFile(zip)
-                    zip_root.extractall(base_path)
+                    zip_root.extractall(unzip_path)
                 except zipfile.BadZipFile:
                     logger.debug("Problem unzipping file", exc_info=1)
+
 
                     
 def run_script():

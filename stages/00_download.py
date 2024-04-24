@@ -31,10 +31,10 @@ def find_current_release():
     return soup.find("a", string="Current-Release")['href']
 
 URL = find_current_release()
-VERSION = re.search("(\d+\.*)+", URL)
+VERSION = re.search(r'BIOGRID-([1-9][0-9.]*)', URL).group(1)
 
 if VERSION is not None:
-    create_config_file(VERSION[0])
+    create_config_file(VERSION)
 
 def get_biogrid_html():
     logger.info("Fetching BioGRID HTML page")
