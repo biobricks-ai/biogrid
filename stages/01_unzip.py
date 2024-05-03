@@ -22,8 +22,8 @@ def create_zip_re_pattern():
     config = None
     with open("version.yaml", "r") as f:
         config = yaml.load(f, yaml.Loader)
-    VERSION_STR = re.escape(config['version'])
-    ZIP_DIR_PATTERN = re.compile(f".*((?=\.tab3)|(?=\.ptm)|(?=\.chemtab)|(?={VERSION_STR}))")
+    VERSION_RE = re.escape(config['version'])
+    ZIP_DIR_PATTERN = re.compile(rf".*((?=\.tab3)|(?=\.ptm)|(?=\.chemtab)|(?={VERSION_RE}))")
     return ZIP_DIR_PATTERN
 
 

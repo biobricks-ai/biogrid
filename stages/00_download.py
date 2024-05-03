@@ -43,7 +43,8 @@ def get_biogrid_html():
     soup = BeautifulSoup(html, features="html.parser")
     return soup
 
-REGEX = f"^https://.*/Download/.*/BIOGRID-((?!OSPREY).*\.*(tab3|chemtab|ptm|-{VERSION})|(IDENTIFIERS-{VERSION}.tab)).zip$"
+VERSION_RE = re.escape(VERSION)
+REGEX = rf"^https://.*/Download/.*/BIOGRID-((?!OSPREY).*\.(tab3|chemtab|ptm|-{VERSION_RE})|(IDENTIFIERS-{VERSION_RE}\.tab))\.zip$"
 files = re.compile(REGEX)
 
 
