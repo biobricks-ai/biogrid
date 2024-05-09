@@ -25,9 +25,11 @@ DTYPES = {
         "Ontology Term Qualifier Names",
         "Ontology Term Types",
         "Tags",
+        "Modification",
         "Qualifications",
         "Post Translational Modification",
-        "Entrez Gene Interactor A" "Entrez Gene Interactor B",
+        "Entrez Gene Interactor A",
+        "Entrez Gene Interactor B",
         "Related BioGRID Gene ID",
         "Related Entrez Gene ID",
         "Related Organism ID",
@@ -36,7 +38,9 @@ DTYPES = {
         "Systematic Name Interactor A",
         "Systematic Name Interactor B",
     ]
-}
+} | {
+        'Position': 'Int64'
+    }
 
 
 def read_file(f):
