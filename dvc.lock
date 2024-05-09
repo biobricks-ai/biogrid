@@ -5,14 +5,14 @@ stages:
     deps:
     - path: stages/00_download.py
       hash: md5
-      md5: 6dba48efd9db182291e63ae3bb869117
-      size: 2652
+      md5: fc5223510cdfc3cb6f0e725e148236c0
+      size: 2692
     outs:
     - path: download
       hash: md5
-      md5: f219b565f979ab0e9a064e6cd1428d31.dir
-      size: 944858053
-      nfiles: 15
+      md5: 7baf6051b862f3538f058b0a5657744b.dir
+      size: 876674843
+      nfiles: 8
     - path: version.yaml
       hash: md5
       md5: 0d2ea6fd1656d178b023dcffab5785d1
@@ -22,13 +22,13 @@ stages:
     deps:
     - path: download
       hash: md5
-      md5: f219b565f979ab0e9a064e6cd1428d31.dir
-      size: 944858053
-      nfiles: 15
+      md5: 7baf6051b862f3538f058b0a5657744b.dir
+      size: 876674843
+      nfiles: 8
     - path: stages/02_process.py
       hash: md5
-      md5: c05a181aad3cf98bd7955b2a56c6be2e
-      size: 2969
+      md5: e0e9739964fd23b5d3786686f0c75d4c
+      size: 3040
     - path: version.yaml
       hash: md5
       md5: 0d2ea6fd1656d178b023dcffab5785d1
@@ -36,16 +36,16 @@ stages:
     outs:
     - path: brick
       hash: md5
-      md5: bc5f71a461d7d9cf27892375736c74f0.dir
-      size: 590954957
-      nfiles: 118
+      md5: 394b220d65754c8b81f5eea1d8756130.dir
+      size: 560115827
+      nfiles: 119
   unzip:
     cmd: python3 stages/01_unzip.py
     deps:
     - path: stages/01_unzip.py
       hash: md5
-      md5: 1b1c156d1e0a815789714935fac0f274
-      size: 1880
+      md5: 8cc07fb6505390c89c487553f8e3db0b
+      size: 1525
     - path: version.yaml
       hash: md5
       md5: 0d2ea6fd1656d178b023dcffab5785d1
@@ -53,6 +53,6 @@ stages:
     outs:
     - path: unzip
       hash: md5
-      md5: 59c18c3f75d1a608b1e5e8ba1aab2352.dir
-      size: 5829322640
-      nfiles: 118
+      md5: 4da9a4fe6087f80d41bdb633c94fedaf.dir
+      size: 8335709311
+      nfiles: 119
