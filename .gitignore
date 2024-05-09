@@ -1,4 +1,8 @@
-logs
-/download
-/list
+.venv
+brick/
+download/
+unzip/
+/unzip
 /brick
+version.yaml
+/download
